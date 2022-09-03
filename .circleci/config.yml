@@ -19,12 +19,14 @@ commands:
       # Add parameter here 
       to:
         type: string  
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name <<parameters.to>>
+            aws cloudformation delete-stack --stack-name "udapeople-frontend-<<parameters.to>>"
+            aws cloudformation delete-stack --stack-name "udapeople-backend-<<parameters.to>>"
 jobs:
   build-frontend:
     docker:
@@ -179,9 +181,7 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
       - destroy-environment:
-          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+          to: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   configure-infrastructure:
     docker:
@@ -210,9 +210,7 @@ jobs:
 
       # Here's where you will add some code to rollback on failure  
       - destroy-environment:
-          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+          to: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   run-migrations:
     docker:
@@ -241,9 +239,7 @@ jobs:
             fi
     # Here's where you will add some code to rollback on failure      
       - destroy-environment:
-          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+          to: "${CIRCLE_WORKFLOW_ID:0:7}"
   
   deploy-frontend:
     docker:
@@ -280,10 +276,8 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
             
       # Here's where you will add some code to rollback on failure      
-      - destroy-environment:
-          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment
+
   deploy-backend:
     docker:
       # Docker image here that supports Ansible
@@ -317,11 +311,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure  
-      - destroy-environment:
-          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
-      - destroy-environment:
-          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
-
+      - destroy-environment
 
 
 workflows:
