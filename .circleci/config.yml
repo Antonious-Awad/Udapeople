@@ -4,6 +4,15 @@ orbs:
   slack: circleci/slack@4.10.1
 
 commands:
+  install-aws:
+    description: install aws-cli
+    steps:
+      - run:
+          name: Install AWS CLI V2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -216,6 +225,7 @@ jobs:
       - restore_cache:
           key: backend-build
 
+      - install-aws
       - run:
           name: Run migrations
           command: |
