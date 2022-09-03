@@ -165,6 +165,7 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=udapeople" \
             --output text >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
@@ -175,7 +176,35 @@ jobs:
       - destroy-environment:
           to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
 
+  configure-infrastructure:
+    docker:
+      # Docker image here that supports Ansible
+      - image: python:3.7-alpine3.11
 
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["8f:55:25:87:a6:6b:f8:66:a9:28:1b:91:99:f4:af:ba"]
+      # attach workspace
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip ansible aws-cli
+      - run:
+          name: Configure server
+          command: |
+            cd .cirlceci/ansible
+            ansible-playbook -i inventroy.txt config-server.yml
+
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment:
+          to: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          to: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"    
 workflows:
   default:
     jobs:
