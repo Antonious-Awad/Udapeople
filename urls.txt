@@ -1,2 +1,4 @@
 URL01: https://github.com/Antonious-Awad/Udapeople
-URL02: 
+URL02: http://udapeople-57cc357.s3-website-us-east-1.amazonaws.com
+URL03: https://dlzojt37gxzrs.cloudfront.net
+URL04: http://ec2-34-207-164-42.compute-1.amazonaws.com:3030/api/status
