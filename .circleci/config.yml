@@ -41,8 +41,7 @@ commands:
           # Add when this will run
           when: on_fail
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = $(curl --insecure https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.to>>)
+            SUCCESS=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.to>>)
             if(( $SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -273,12 +272,13 @@ jobs:
       - checkout
       - restore_cache:
           key: frontend-build
-      - install-aws
       - run:
           name: Install dependencies
           command: |
             yum install -y nodejs
             yum install -y npm
+            yum install -y gzip
+      - install-aws
       - run:
           name: Get backend url
           command: |
