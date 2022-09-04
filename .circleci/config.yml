@@ -285,6 +285,8 @@ jobs:
             yum install -y nodejs
             yum install -y npm
             yum install -y aws-cli
+            cd frontend
+            npm install
       - run:
           name: Get backend url
           command: |
