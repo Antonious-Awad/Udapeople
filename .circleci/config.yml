@@ -271,12 +271,8 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      - run:
-          name: Install
-          command: |
-            yum install -y tar
-      - attach_workspace:
-          at: ~/
+      - restore_cache:
+          key: frontend-build
       - run:
           name: Install dependencies
           command: |
@@ -320,8 +316,8 @@ jobs:
           fingerprints: ["8f:55:25:87:a6:6b:f8:66:a9:28:1b:91:99:f4:af:ba"]
           
       # attach workspace
-      - attach_workspace:
-          at: ~/
+      - restore_cache:
+          key: backend-build
       - run:
           name: Install dependencies
           command: |
