@@ -281,9 +281,10 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP= ${aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress \
-            --output text'}
+            export BACKEND_IP=${aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text}
+
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -314,21 +315,34 @@ jobs:
           fingerprints: ["8f:55:25:87:a6:6b:f8:66:a9:28:1b:91:99:f4:af:ba"]
           
       # attach workspace
+      - attach_workspace:
+          at: ~/
+      
       - restore_cache:
           key: backend-build
       - run:
           name: Install dependencies
           command: |
             apk add --update tar gzip ansible nodejs npm aws-cli
+            cd backend
+            npm install
+
+      - run:
+          name: Package Backend
+          command: |
+            cd backend
+            npm run build
+            tar -czf artifact.tar.gz dist/* package*
+
+            cd ..
+            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
           name: Deploy backend
           command: |
-            cd backend
-            npm i
-            npm run build
-            cd ..
-            # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
+            export TYPEORM_MIGRATIONS_DIR=./migrations
+            export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
+            
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
@@ -362,5 +376,5 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
