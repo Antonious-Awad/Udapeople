@@ -266,19 +266,18 @@ jobs:
   deploy-frontend:
     docker:
       # Docker image here that supports AWS CLI
-      - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       # Checkout code from git
       - checkout
       - restore_cache:
           key: frontend-build
+      - install-aws
       - run:
           name: Install dependencies
           command: |
-            yum install -y nodejs
-            yum install -y npm
-            yum install -y gzip
-      - install-aws
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs
       - run:
           name: Get backend url
           command: |
